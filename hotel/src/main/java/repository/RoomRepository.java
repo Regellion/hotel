@@ -8,11 +8,13 @@ public interface RoomRepository {
 
     Room saveRoom(Room room);
 
-    Room getRoomById(Integer id);
+    Room getRoomById(Long id);
 
     List<Room> getAllRooms();
 
-    void deleteRoomById(Integer id);
+    void deleteRoomById(Long id);
 
     void deleteAllRooms();
+
+    Room updateRoomById(Room room);
 }

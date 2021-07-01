@@ -1,35 +1,39 @@
 package model;
 
+import org.hibernate.annotations.Where;
+
+import javax.persistence.*;
+import java.util.Date;
+
+@Entity
+@Table(name = "rooms")
+@Where(clause = "delete_time IS NULL")
 public class Room {
-    private Integer id;
-    private Boolean isBlocked;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private Long id;
+
+    @Column(name = "room_status")
     private Boolean isUnderRenovation;
+
+    @Column(name = "room_price")
     private Integer price;
+
+    @Column(name = "delete_time")
+    private Date deleteTime;
 
     public Room() {
     }
 
-    public Room(Integer id, Boolean isBlocked, Boolean isUnderRenovation, Integer price) {
-        this.id = id;
-        this.isBlocked = isBlocked;
+    public Room(Boolean isUnderRenovation, Integer price) {
         this.isUnderRenovation = isUnderRenovation;
         this.price = price;
     }
 
-    public Integer getId() {
+    public Long getId() {
         return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public Boolean isBlocked() {
-        return isBlocked;
-    }
-
-    public void setBlocked(Boolean blocked) {
-        isBlocked = blocked;
     }
 
     public Boolean isUnderRenovation() {
@@ -48,13 +52,21 @@ public class Room {
         this.price = price;
     }
 
+    public Date getDeleteTime() {
+        return deleteTime;
+    }
+
+    public void setDeleteTime(Date deleteTime) {
+        this.deleteTime = deleteTime;
+    }
+
     @Override
     public String toString() {
         return "Room{" +
                 "id=" + id +
-                ", isBlocked=" + isBlocked +
                 ", isUnderRenovation=" + isUnderRenovation +
                 ", price=" + price +
+                ", deleteTime=" + (deleteTime == null ? "N/A" : deleteTime) +
                 '}';
     }
 }

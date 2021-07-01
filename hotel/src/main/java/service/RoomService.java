@@ -1,23 +1,21 @@
 package service;
 
+import dto.RoomDto;
 import model.Room;
 
 import java.util.List;
 
 public interface RoomService {
-    // create
-    Room createRoom(Room room);
 
-    // read
+    Room createRoom(RoomDto roomDto);
+
     List<Room> getAllRooms();
 
-    Room getRoomById(Integer id);
+    Room getRoomById(Long id);
 
-    //update
-    void updateRoomById(Room room);
+    void updateRoomById(Long id, RoomDto roomDto);
 
-    //delete
     void deleteAllRooms();
 
-    void deleteRoomById(Integer id);
+    void deleteRoomById(Long id);
 }
