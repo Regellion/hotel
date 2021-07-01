@@ -1,104 +1,119 @@
 package repository;
 
-import model.Room;
+import model.Booking;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import utils.HibernateUtil;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
-public class RoomRepositoryImpl implements RoomRepository {
+
+public class BookingRepositoryImpl implements BookingRepository {
     private static final SessionFactory factory = HibernateUtil.getSessionFactory();
     private static final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     @Override
-    public Room saveRoom(Room room) {
+    public Booking saveBooking(Booking booking) {
         long start = System.currentTimeMillis();
+        Booking tempBooking = null;
         try (Session session = factory.getCurrentSession()) {
             session.beginTransaction();
-            session.save(room);
+            session.save(booking);
+            tempBooking = session.get(Booking.class, booking.getId());
             session.getTransaction().commit();
         } catch (HibernateException e) {
             factory.getCurrentSession().getTransaction().rollback();
             System.err.println(formatter.format(start) + " ERROR in class " + this.getClass().getName() + ": Error adding data to the database. " + e);
         }
-        return room;
+        return tempBooking;
     }
 
     @Override
-    public Room getRoomById(Long id) {
-        Room room = null;
+    public Booking getBookingById(Long id) {
+        Booking booking = null;
         long start = System.currentTimeMillis();
         try (Session session = factory.getCurrentSession()) {
             session.beginTransaction();
-            room = session.get(Room.class, id);
+            booking = session.get(Booking.class, id);
+            session.getTransaction().commit();
+        } catch (HibernateException e) {
+            factory.getCurrentSession().getTransaction().rollback();
+            System.err.println(formatter.format(start) + " ERROR in class " + this.getClass().getName() + ": Error adding data to the database. " + e);
+        }
+        return booking;
+    }
+
+    @Override
+    public List<Booking> getBookingsByUserId(Long id) {
+        List<Booking> bookings = new ArrayList<>();
+        long start = System.currentTimeMillis();
+        try (Session session = factory.getCurrentSession()) {
+            session.beginTransaction();
+            bookings = session.createQuery("FROM Booking WHERE user.id = " + id).getResultList();
             session.getTransaction().commit();
         } catch (HibernateException e) {
             factory.getCurrentSession().getTransaction().rollback();
             System.err.println(formatter.format(start) + " ERROR in class " + this.getClass().getName() + ": Error retrieving data from the database. " + e);
         }
-        return room;
+        return bookings;
     }
 
     @Override
-    public List<Room> getAllRooms() {
-        List<Room> rooms = new ArrayList<>();
+    public List<Booking> getBookingsByRoomId(Long id) {
+        List<Booking> bookings = new ArrayList<>();
         long start = System.currentTimeMillis();
         try (Session session = factory.getCurrentSession()) {
             session.beginTransaction();
-            rooms = session.createQuery("FROM Room").getResultList();
+            bookings = session.createQuery("FROM Booking WHERE room.id = " + id).getResultList();
             session.getTransaction().commit();
         } catch (HibernateException e) {
             factory.getCurrentSession().getTransaction().rollback();
             System.err.println(formatter.format(start) + " ERROR in class " + this.getClass().getName() + ": Error retrieving data from the database. " + e);
         }
-        return rooms;
+        return bookings;
     }
 
     @Override
-    public void deleteRoomById(Long id) {
+    public List<Booking> getAllBookings() {
+        List<Booking> bookings = new ArrayList<>();
         long start = System.currentTimeMillis();
         try (Session session = factory.getCurrentSession()) {
             session.beginTransaction();
-            Room room = session.get(Room.class, id);
-            session.createQuery("UPDATE Room SET deleteTime = sysdate() WHERE id = " + room.getId()).executeUpdate();
+            bookings = session.createQuery("FROM Booking ").getResultList();
+            session.getTransaction().commit();
+        } catch (HibernateException e) {
+            factory.getCurrentSession().getTransaction().rollback();
+            System.err.println(formatter.format(start) + " ERROR in class " + this.getClass().getName() + ": Error retrieving data from the database. " + e);
+        }
+        return bookings;
+    }
+
+    @Override
+    public void deleteBookingById(Long id) {
+        long start = System.currentTimeMillis();
+        try (Session session = factory.getCurrentSession()) {
+            session.beginTransaction();
+            Booking booking = session.get(Booking.class, id);
+            session.createQuery("UPDATE Booking SET deleteTime = sysdate() WHERE id = " + booking.getId()).executeUpdate();
+            session.getTransaction().commit();
+        } catch (HibernateException e) {
+            factory.getCurrentSession().getTransaction().rollback();
+            System.err.println(formatter.format(start) + " ERROR in class " + this.getClass().getName() + ": Error adding data to the database. " + e);
+        }
+    }
+
+    @Override
+    public void deleteAllBookings() {
+        long start = System.currentTimeMillis();
+        try (Session session = factory.getCurrentSession()) {
+            session.beginTransaction();
+            session.createQuery("UPDATE Booking SET deleteTime = sysdate()").executeUpdate();
             session.getTransaction().commit();
         } catch (HibernateException e) {
             factory.getCurrentSession().getTransaction().rollback();
             System.err.println(formatter.format(start) + " ERROR in class " + this.getClass().getName() + ": Error deleting data from the database. " + e);
         }
-    }
-
-    @Override
-    public void deleteAllRooms() {
-        long start = System.currentTimeMillis();
-        try (Session session = factory.getCurrentSession()) {
-            session.beginTransaction();
-            session.createQuery("UPDATE Room SET deleteTime = sysdate()").executeUpdate();
-            session.getTransaction().commit();
-        } catch (HibernateException e) {
-            factory.getCurrentSession().getTransaction().rollback();
-            System.err.println(formatter.format(start) + " ERROR in class " + this.getClass().getName() + ": Error deleting data from the database. " + e);
-        }
-    }
-
-    @Override
-    public Room updateRoomById(Room room) {
-        long start = System.currentTimeMillis();
-        Room tempRoom = null;
-        try (Session session = factory.getCurrentSession()) {
-            session.beginTransaction();
-            session.update(room);
-            tempRoom = session.get(Room.class, room.getId());
-            session.getTransaction().commit();
-            return tempRoom;
-        } catch (HibernateException e) {
-            factory.getCurrentSession().getTransaction().rollback();
-            System.err.println(formatter.format(start) + " ERROR in class " + this.getClass().getName() + ": Error deleting data from the database. " + e);
-        }
-        return tempRoom;
     }
 }
