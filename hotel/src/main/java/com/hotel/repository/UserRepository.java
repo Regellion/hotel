@@ -1,6 +1,6 @@
-package repository;
+package com.hotel.repository;
 
-import model.User;
+import com.hotel.model.User;
 
 import java.util.List;
 

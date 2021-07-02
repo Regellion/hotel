@@ -1,4 +1,4 @@
-package dto;
+package com.hotel.dto;
 
 public class UserDto {
     private Long id;

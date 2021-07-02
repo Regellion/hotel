@@ -1,4 +1,4 @@
-package model;
+package com.hotel.model;
 
 import org.hibernate.annotations.Where;
 

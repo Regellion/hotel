@@ -1,6 +1,6 @@
-package repository;
+package com.hotel.repository;
 
-import model.Room;
+import com.hotel.model.Room;
 
 import java.util.List;
 
