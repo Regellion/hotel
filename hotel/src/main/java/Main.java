@@ -1,24 +1,30 @@
-import dto.BookingDto;
-import dto.RoomDto;
-import dto.UserDto;
-import service.*;
-import utils.DTOMaker;
+import com.hotel.dto.BookingDto;
+import com.hotel.dto.RoomDto;
+import com.hotel.dto.UserDto;
+import com.hotel.exception.BookingException;
+import com.hotel.exception.RoomException;
+import com.hotel.exception.UserException;
+import com.hotel.service.*;
+import com.hotel.springConfig.SpringConfig;
+import com.hotel.utils.DTOMaker;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import java.util.Date;
 import java.util.Scanner;
 
 public class Main {
-    private static final RoomService roomService = new RoomServiceImpl();
-    private static final UserService userService = new UserServiceImpl();
-    private static final BookingService bookingService = new BookingServiceImpl();
-
+    private static final AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(SpringConfig.class);
+    private static final RoomService roomService = context.getBean("roomServiceImpl", RoomService.class);
+    private static final UserService userService = context.getBean("userServiceImpl", UserService.class);
+    private static final BookingService bookingService = context.getBean("bookingServiceImpl", BookingService.class);
+    private static boolean isContinue = true;
     public static void main(String[] args) {
 
 
         printInfo("Добро пожаловать в тест программы по созданию номеров.");
         Scanner scanner = new Scanner(System.in);
 
-        while (true) {
+        while (isContinue) {
             printInfo("Введите числа от 1 до 19 где:\n" +
                     "1 - создать новый номер.\n" +
                     "2 - получить список всех номеров.\n" +
@@ -38,7 +44,8 @@ public class Main {
                     "16 - получить список всех бронирований для номера.\n" +
                     "17 - получить список всех бронирований для пользователя.\n" +
                     "18 - получить бронирование по id.\n" +
-                    "19 - удалить бронирование по id.\n");
+                    "19 - удалить бронирование по id.\n" +
+                    "20 - выйти из программы.");
 
             int input = scanner.nextInt();
 
@@ -80,10 +87,17 @@ public class Main {
                 getBookingById();
             } else if (input == 19) {
                 deleteBookingById();
+            } else if (input == 20) {
+                exit();
             } else {
                 printInfo("Ваше число не входит в заданный диапазон.");
             }
         }
+        context.close();
+    }
+
+    private static void exit() {
+        isContinue = false;
     }
 
     private static void deleteBookingById() {
@@ -92,7 +106,7 @@ public class Main {
         try {
             bookingService.deleteBookingById(id);
             printInfo("Бронирование с id " + id + " успешно удалено.");
-        } catch (Exception e) {
+        } catch (BookingException e) {
             System.err.println(e.getMessage());
             printInfo("Бронирования с id " + id + " не существует!");
         }
@@ -103,7 +117,7 @@ public class Main {
         long id = DTOMaker.setId();
         try {
             printInfo(bookingService.getBookingById(id).toString());
-        } catch (Exception e) {
+        } catch (BookingException e) {
             System.err.println(e.getMessage());
             printInfo("бронирования с id " + id + " не существует!");
         }
@@ -114,7 +128,7 @@ public class Main {
         long userId = DTOMaker.setId();
         try {
             bookingService.getBookingByUserId(userId).forEach(System.out::println);
-        } catch (Exception e) {
+        } catch (BookingException e) {
             System.err.println(e.getMessage());
             printInfo("Для пользователя с id " + userId + " нет бронирований.");
         }
@@ -125,7 +139,7 @@ public class Main {
         long roomId = DTOMaker.setId();
         try {
             bookingService.getBookingByRoomId(roomId).forEach(System.out::println);
-        } catch (Exception e) {
+        } catch (BookingException e) {
             System.err.println(e.getMessage());
             printInfo("Для номера с id " + roomId + " нет бронирований.");
         }
@@ -135,7 +149,7 @@ public class Main {
         try {
             bookingService.deleteAllBookings();
             printInfo("Все бронирования успешно удалены.");
-        } catch (Exception e) {
+        } catch (BookingException e) {
             System.err.println(e.getMessage());
             printInfo("Список бронирований уже пуст.");
         }
@@ -145,7 +159,7 @@ public class Main {
         try {
             printInfo("Короткий список всех бронирований:");
             bookingService.getAllBookings().forEach(System.out::println);
-        } catch (Exception e) {
+        } catch (BookingException e) {
             System.err.println(e.getMessage());
             printInfo("Список бронирований пуст");
         }
@@ -167,10 +181,10 @@ public class Main {
             try {
                 bookingService.saveBooking(bookingDto);
                 printInfo("Бронирование прошло успешно.");
-            } catch (Exception e) {
+            } catch (BookingException | RoomException e) {
                 System.err.println(e.getMessage());
-                //todo Понимаю что говнокод, и надо сделать свои exception'ы
-                if (e.getMessage().equals("The room is unavailable.")) {
+
+                if (e.getClass().equals(RoomException.class)) {
                     printInfo("Номер недоступен.");
                 }
                 if (e.getMessage().equals("Start date is after end date.")) {
@@ -181,7 +195,7 @@ public class Main {
                 }
                 printInfo("Бронирование не удалось! Попробуйте заново.");
             }
-        } catch (RuntimeException e) {
+        } catch (BookingException e) {
             System.err.println(e.getMessage());
             printInfo("Ввод даты неудался!");
         }
@@ -191,7 +205,7 @@ public class Main {
         try {
             userService.deleteAllUsers();
             printInfo("Все пользователи успешно удалены.");
-        } catch (Exception e) {
+        } catch (UserException e) {
             System.err.println(e.getMessage());
             printInfo("Список пользователей уже пуст.");
         }
@@ -203,7 +217,7 @@ public class Main {
         try {
             userService.deleteUserById(id);
             printInfo("Пользователь с id " + id + " успешно удален.");
-        } catch (Exception e) {
+        } catch (UserException e) {
             System.err.println(e.getMessage());
             printInfo("Пользователя с id " + id + " не существует!");
         }
@@ -219,7 +233,7 @@ public class Main {
             userService.updateUserById(id, new UserDto(name));
             printInfo("Обновление прошло успешно.");
             printInfo(userService.getUserById(id).toString());
-        } catch (Exception e) {
+        } catch (UserException e) {
             System.err.println(e.getMessage());
             printInfo("пользователя с id " + id + " не существует!");
         }
@@ -230,7 +244,7 @@ public class Main {
         long id = DTOMaker.setId();
         try {
             printInfo(userService.getUserById(id).toString());
-        } catch (Exception e) {
+        } catch (UserException e) {
             System.err.println(e.getMessage());
             printInfo("Пользователя с id " + id + " не существует!");
         }
@@ -239,7 +253,7 @@ public class Main {
     private static void getAllUser() {
         try {
             userService.getAllUsers().forEach(System.out::println);
-        } catch (Exception e) {
+        } catch (UserException e) {
             System.err.println(e.getMessage());
             printInfo("Список пользователей пуст");
         }
@@ -251,7 +265,7 @@ public class Main {
         try {
             userService.createUser(new UserDto(name));
             printInfo("Пользователь успешно создан.");
-        } catch (Exception e) {
+        } catch (UserException e) {
             System.err.println(e.getMessage());
             printInfo("Не удалось создать пользователя.");
         }
@@ -263,7 +277,7 @@ public class Main {
         long id = DTOMaker.setId();
         try {
             printInfo(roomService.getRoomById(id).toString());
-        } catch (Exception e) {
+        } catch (RoomException e) {
             System.err.println(e.getMessage());
             printInfo("Комната под номером " + id + " не существует!");
         }
@@ -273,7 +287,7 @@ public class Main {
         try {
             printInfo("Короткий список всех номеров:");
             roomService.getAllRooms().forEach(System.out::println);
-        } catch (Exception e) {
+        } catch (RoomException e) {
             System.err.println(e.getMessage());
             printInfo("Список номеров пуст");
         }
@@ -296,7 +310,7 @@ public class Main {
             roomService.updateRoomById(id, new RoomDto(isUnderRenovation, price));
             printInfo("Обновление прошло успешно.");
             printInfo(roomService.getRoomById(id).toString());
-        } catch (Exception e) {
+        } catch (RoomException e) {
             System.err.println(e.getMessage());
             printInfo("Комната под номером " + id + " не существует!");
         }
@@ -306,7 +320,7 @@ public class Main {
         try {
             roomService.deleteAllRooms();
             printInfo("Все номера успешно удалены.");
-        } catch (Exception e) {
+        } catch (RoomException e) {
             System.err.println(e.getMessage());
             printInfo("Список номеров уже пуст.");
         }
@@ -318,7 +332,7 @@ public class Main {
         try {
             roomService.deleteRoomById(id);
             printInfo("Комната под номером " + id + " успешно удалена.");
-        } catch (Exception e) {
+        } catch (RoomException e) {
             printError(e.getMessage());
             printInfo("Комната под номером " + id + " не существует!");
         }
@@ -334,7 +348,7 @@ public class Main {
         try {
             roomService.createRoom(new RoomDto(isUnderRenovation, price));
             printInfo("Комната успешно создана.");
-        } catch (Exception e) {
+        } catch (RoomException e) {
             printError(e.getMessage());
             printInfo("Не удалось создать комнату.");
         }

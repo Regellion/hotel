@@ -1,7 +1,7 @@
-package service;
+package com.hotel.service;
 
-import dto.RoomDto;
-import model.Room;
+import com.hotel.dto.RoomDto;
+import com.hotel.model.Room;
 
 import java.util.List;
 
