@@ -1,6 +1,7 @@
 package com.hotel.repository;
 
 import com.hotel.model.User;
+import lombok.AllArgsConstructor;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -11,14 +12,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Repository
+@AllArgsConstructor
 public class UserRepositoryImpl implements UserRepository {
 
     private final SessionFactory sessionFactory;
     private static final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-    public UserRepositoryImpl(SessionFactory sessionFactory) {
-        this.sessionFactory = sessionFactory;
-    }
 
     @Override
     public User saveUser(User user) {
@@ -71,6 +69,7 @@ public class UserRepositoryImpl implements UserRepository {
         try (Session session = sessionFactory.getCurrentSession()) {
             session.beginTransaction();
             User user = session.get(User.class, id);
+            session.createQuery("UPDATE Booking SET deleteTime = sysdate() WHERE user.id = " + user.getId()).executeUpdate();
             session.createQuery("UPDATE User SET deleteTime = sysdate() WHERE id = " + user.getId()).executeUpdate();
             session.getTransaction().commit();
         } catch (HibernateException e) {
@@ -84,6 +83,7 @@ public class UserRepositoryImpl implements UserRepository {
         long start = System.currentTimeMillis();
         try (Session session = sessionFactory.getCurrentSession()) {
             session.beginTransaction();
+            session.createQuery("UPDATE Booking SET deleteTime = sysdate()").executeUpdate();
             session.createQuery("UPDATE User SET deleteTime = sysdate()").executeUpdate();
             session.getTransaction().commit();
         } catch (HibernateException e) {
