@@ -1,43 +1,46 @@
 package com.hotel.service;
 
+import com.hotel.dto.RoomDto;
+import com.hotel.dto.UserDto;
 import com.hotel.exception.BookingException;
 import com.hotel.exception.RoomException;
-import com.hotel.model.Booking;
+import com.hotel.mapper.BookingMapper;
 import com.hotel.dto.BookingDto;
+import com.hotel.mapper.RoomMapper;
+import com.hotel.mapper.UserMapper;
+import com.hotel.model.Booking;
 import com.hotel.model.Room;
 import com.hotel.model.User;
 import com.hotel.repository.BookingRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
+@AllArgsConstructor
 public class BookingServiceImpl implements BookingService {
+    private final BookingMapper bookingMapper;
+    private final RoomMapper roomMapper;
+    private final UserMapper userMapper;
 
     private final BookingRepository bookingRepository;
     private final UserService userService;
     private final RoomService roomService;
 
-    public BookingServiceImpl(BookingRepository bookingRepository,
-                              UserService userService,
-                              RoomService roomService) {
-        this.bookingRepository = bookingRepository;
-        this.userService = userService;
-        this.roomService = roomService;
+    @Override
+    public BookingDto saveBooking(BookingDto bookingDto) {
+        Booking validateBooking = validateBooking(roomMapper.toEntity(roomService.getRoomById(bookingDto.getRoom().getId())),
+                userMapper.toEntity(userService.getUserById(bookingDto.getUser().getId())), bookingDto);
+        return bookingMapper.toDto(Optional.ofNullable(bookingRepository.saveBooking(validateBooking))
+                .orElseThrow(() -> new BookingException("Booking failed")));
     }
 
     @Override
-    public Booking saveBooking(BookingDto bookingDto) {
-        Booking validateBooking = validateBooking(roomService.getRoomById(bookingDto.getRoomId()),
-                userService.getUserById(bookingDto.getUserId()), bookingDto);
-        return Optional.ofNullable(bookingRepository.saveBooking(validateBooking))
-                .orElseThrow(() -> new BookingException("Booking failed"));
-    }
-
-    @Override
-    public List<Booking> getAllBookings() {
-        List<Booking> bookings = bookingRepository.getAllBookings();
+    public List<BookingDto> getAllBookings() {
+        List<BookingDto> bookings = bookingRepository.getAllBookings().stream().map(bookingMapper::toDto).collect(Collectors.toList());
         if (bookings.size() == 0) {
             throw new BookingException("Bookings list is empty");
         }
@@ -45,14 +48,15 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Booking getBookingById(Long id) {
-        return Optional.ofNullable(bookingRepository.getBookingById(id)).orElseThrow(() -> new BookingException("Booking not found"));
+    public BookingDto getBookingById(Long id) {
+        return bookingMapper.toDto(
+                Optional.ofNullable(bookingRepository.getBookingById(id)).orElseThrow(() -> new BookingException("Booking not found")));
     }
 
     @Override
-    public List<Booking> getBookingByUserId(Long id) {
-        User user = userService.getUserById(id);
-        List<Booking> bookings = bookingRepository.getBookingsByUserId(user.getId());
+    public List<BookingDto> getBookingByUserId(Long id) {
+        UserDto user = userService.getUserById(id);
+        List<BookingDto> bookings = bookingRepository.getBookingsByUserId(user.getId()).stream().map(bookingMapper::toDto).collect(Collectors.toList());
         if (bookings.size() == 0) {
             throw new BookingException("Bookings list for user " + id + " is empty");
         }
@@ -60,9 +64,9 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<Booking> getBookingByRoomId(Long id) {
-        Room room = roomService.getRoomById(id);
-        List<Booking> bookings = bookingRepository.getBookingsByRoomId(room.getId());
+    public List<BookingDto> getBookingByRoomId(Long id) {
+        RoomDto room = roomService.getRoomById(id);
+        List<BookingDto> bookings = bookingRepository.getBookingsByRoomId(room.getId()).stream().map(bookingMapper::toDto).collect(Collectors.toList());
         if (bookings.size() == 0) {
             throw new BookingException("Bookings list for room " + id + " is empty");
         }
@@ -71,7 +75,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public void deleteAllBookings() {
-        List<Booking> bookingList = bookingRepository.getAllBookings();
+        List<BookingDto> bookingList = bookingRepository.getAllBookings().stream().map(bookingMapper::toDto).collect(Collectors.toList());
         if (bookingList.size() == 0) {
             throw new BookingException("Bookings list is empty");
         }
@@ -80,17 +84,17 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public void deleteBookingById(Long id) {
-        Booking tempBooking = Optional.ofNullable(bookingRepository.getBookingById(id))
-                .orElseThrow(() -> new BookingException("Booking not found"));
+        BookingDto tempBooking = bookingMapper.toDto(Optional.ofNullable(bookingRepository.getBookingById(id))
+                .orElseThrow(() -> new BookingException("Booking not found")));
         bookingRepository.deleteBookingById(tempBooking.getId());
     }
 
     private Booking validateBooking(Room room, User user, BookingDto bookingDto) {
-        if (room.isUnderRenovation()) {
+        if (room.getUnderRenovation()) {
             throw new RoomException("The room is unavailable.");
         }
-        List<Booking> bookings = bookingRepository.getBookingsByRoomId(bookingDto.getRoomId());
-        Optional<Booking> roomIsBooked = bookings.stream()
+        List<BookingDto> bookings = bookingRepository.getBookingsByRoomId(bookingDto.getRoom().getId()).stream().map(bookingMapper::toDto).collect(Collectors.toList());
+        Optional<BookingDto> roomIsBooked = bookings.stream()
                 .filter(b -> (bookingDto.getStartDate().after(b.getStartDate()) && bookingDto.getStartDate().before(b.getEndDate())
                         || (bookingDto.getEndDate().after(b.getStartDate()) && bookingDto.getEndDate().before(b.getEndDate()))
                         || (b.getStartDate().after(bookingDto.getStartDate()) && b.getStartDate().before(bookingDto.getEndDate())))

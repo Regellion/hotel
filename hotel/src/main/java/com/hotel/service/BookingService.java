@@ -1,21 +1,20 @@
 package com.hotel.service;
 
-import com.hotel.model.Booking;
 import com.hotel.dto.BookingDto;
 
 import java.util.List;
 
 public interface BookingService {
 
-    Booking saveBooking(BookingDto bookingDto);
+    BookingDto saveBooking(BookingDto bookingDto);
 
-    List<Booking> getAllBookings();
+    List<BookingDto> getAllBookings();
 
-    Booking getBookingById(Long id);
+    BookingDto getBookingById(Long id);
 
-    List<Booking> getBookingByUserId(Long id);
+    List<BookingDto> getBookingByUserId(Long id);
 
-    List<Booking> getBookingByRoomId(Long id);
+    List<BookingDto> getBookingByRoomId(Long id);
 
     void deleteAllBookings();
 

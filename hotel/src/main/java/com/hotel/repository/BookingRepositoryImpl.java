@@ -1,6 +1,7 @@
 package com.hotel.repository;
 
 import com.hotel.model.Booking;
+import lombok.AllArgsConstructor;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -10,14 +11,11 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Repository
+@AllArgsConstructor
 public class BookingRepositoryImpl implements BookingRepository {
 
     private final SessionFactory sessionFactory;
     private static final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-    public BookingRepositoryImpl(SessionFactory sessionFactory) {
-        this.sessionFactory = sessionFactory;
-    }
 
     @Override
     public Booking saveBooking(Booking booking) {

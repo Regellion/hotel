@@ -1,6 +1,7 @@
 package com.hotel.repository;
 
 import com.hotel.model.Room;
+import lombok.AllArgsConstructor;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -11,14 +12,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Repository
+@AllArgsConstructor
 public class RoomRepositoryImpl implements RoomRepository {
 
     private final SessionFactory sessionFactory;
     private static final SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
-    public RoomRepositoryImpl(SessionFactory sessionFactory) {
-        this.sessionFactory = sessionFactory;
-    }
 
     @Override
     public Room saveRoom(Room room) {
@@ -70,6 +68,7 @@ public class RoomRepositoryImpl implements RoomRepository {
         try (Session session = sessionFactory.getCurrentSession()) {
             session.beginTransaction();
             Room room = session.get(Room.class, id);
+            session.createQuery("UPDATE Booking SET deleteTime = sysdate() WHERE room.id = " + room.getId()).executeUpdate();
             session.createQuery("UPDATE Room SET deleteTime = sysdate() WHERE id = " + room.getId()).executeUpdate();
             session.getTransaction().commit();
         } catch (HibernateException e) {
@@ -83,6 +82,7 @@ public class RoomRepositoryImpl implements RoomRepository {
         long start = System.currentTimeMillis();
         try (Session session = sessionFactory.getCurrentSession()) {
             session.beginTransaction();
+            session.createQuery("UPDATE Booking SET deleteTime = sysdate()").executeUpdate();
             session.createQuery("UPDATE Room SET deleteTime = sysdate()").executeUpdate();
             session.getTransaction().commit();
         } catch (HibernateException e) {

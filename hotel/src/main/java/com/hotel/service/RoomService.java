@@ -1,17 +1,16 @@
 package com.hotel.service;
 
 import com.hotel.dto.RoomDto;
-import com.hotel.model.Room;
 
 import java.util.List;
 
 public interface RoomService {
 
-    Room createRoom(RoomDto roomDto);
+    RoomDto createRoom(RoomDto roomDto);
 
-    List<Room> getAllRooms();
+    List<RoomDto> getAllRooms();
 
-    Room getRoomById(Long id);
+    RoomDto getRoomById(Long id);
 
     void updateRoomById(Long id, RoomDto roomDto);
 

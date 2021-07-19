@@ -2,30 +2,30 @@ package com.hotel.service;
 
 import com.hotel.exception.RoomException;
 import com.hotel.dto.RoomDto;
-import com.hotel.model.Room;
+import com.hotel.mapper.RoomMapper;
 import com.hotel.repository.RoomRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
+@AllArgsConstructor
 public class RoomServiceImpl implements RoomService {
     private final RoomRepository roomRepository;
+    private final RoomMapper roomMapper;
 
-    public RoomServiceImpl(RoomRepository roomRepository) {
-        this.roomRepository = roomRepository;
+    @Override
+    public RoomDto createRoom(RoomDto roomDto) {
+        return roomMapper.toDto(Optional.ofNullable(roomRepository.saveRoom(roomMapper.toEntity(roomDto)))
+                .orElseThrow(() -> new RoomException("Failed room creation")));
     }
 
     @Override
-    public Room createRoom(RoomDto roomDto) {
-        return Optional.ofNullable(roomRepository.saveRoom(new Room(roomDto.getUnderRenovation(), roomDto.getPrice())))
-                .orElseThrow(() -> new RoomException("Failed room creation"));
-    }
-
-    @Override
-    public List<Room> getAllRooms() {
-        List<Room> roomList = roomRepository.getAllRooms();
+    public List<RoomDto> getAllRooms() {
+        List<RoomDto> roomList = roomRepository.getAllRooms().stream().map(roomMapper::toDto).collect(Collectors.toList());
         if (roomList.size() == 0) {
             throw new RoomException("Room list is empty");
         }
@@ -33,21 +33,19 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    public Room getRoomById(Long id) {
-        return Optional.ofNullable(roomRepository.getRoomById(id)).orElseThrow(() -> new RoomException("Room not found"));
+    public RoomDto getRoomById(Long id) {
+        return roomMapper.toDto(Optional.ofNullable(roomRepository.getRoomById(id)).orElseThrow(() -> new RoomException("Room not found")));
     }
 
     @Override
     public void updateRoomById(Long id, RoomDto roomDto) {
-        Room tempRoom = Optional.ofNullable(roomRepository.getRoomById(id)).orElseThrow(() -> new RoomException("Room not found"));
-        tempRoom.setUnderRenovation(roomDto.getUnderRenovation());
-        tempRoom.setPrice(roomDto.getPrice());
-        roomRepository.updateRoomById(tempRoom);
+        roomDto.setId(Optional.ofNullable(roomRepository.getRoomById(id)).orElseThrow(() -> new RoomException("Room not found")).getId());
+        roomRepository.updateRoomById(roomMapper.toEntity(roomDto));
     }
 
     @Override
     public void deleteAllRooms() {
-        List<Room> roomList = roomRepository.getAllRooms();
+        List<RoomDto> roomList = roomRepository.getAllRooms().stream().map(roomMapper::toDto).collect(Collectors.toList());
         if (roomList.size() == 0) {
             throw new RoomException("Rooms list is empty");
         }
@@ -56,7 +54,7 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     public void deleteRoomById(Long id) {
-        Room tempRoom = Optional.ofNullable(roomRepository.getRoomById(id)).orElseThrow(() -> new RoomException("Room not found"));
+        RoomDto tempRoom = roomMapper.toDto(Optional.ofNullable(roomRepository.getRoomById(id)).orElseThrow(() -> new RoomException("Room not found")));
         roomRepository.deleteRoomById(tempRoom.getId());
     }
 }
