@@ -38,13 +38,22 @@ public class BookingServiceImpl implements BookingService {
                 .orElseThrow(() -> new BookingException("Booking failed")));
     }
 
+    public BookingDto saveBooking(Long userId, BookingDto bookingDto) {
+        bookingDto.setUser(userService.getUserById(userId));
+        Booking validateBooking = validateBooking(roomMapper.toEntity(roomService.getRoomById(bookingDto.getRoom().getId())),
+                userMapper.toEntity(userService.getUserById(bookingDto.getUser().getId())), bookingDto);
+        return bookingMapper.toDto(Optional.ofNullable(bookingRepository.saveBooking(validateBooking))
+                .orElseThrow(() -> new BookingException("Booking failed")));
+    }
+
     @Override
     public List<BookingDto> getAllBookings() {
-        List<BookingDto> bookings = bookingRepository.getAllBookings().stream().map(bookingMapper::toDto).collect(Collectors.toList());
-        if (bookings.size() == 0) {
-            throw new BookingException("Bookings list is empty");
-        }
-        return bookings;
+        return bookingRepository.getAllBookings().stream().map(bookingMapper::toDto).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<BookingDto> getFullBookingsList() {
+        return bookingRepository.getFullBookingsList().stream().map(bookingMapper::toDto).collect(Collectors.toList());
     }
 
     @Override
@@ -56,29 +65,17 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public List<BookingDto> getBookingByUserId(Long id) {
         UserDto user = userService.getUserById(id);
-        List<BookingDto> bookings = bookingRepository.getBookingsByUserId(user.getId()).stream().map(bookingMapper::toDto).collect(Collectors.toList());
-        if (bookings.size() == 0) {
-            throw new BookingException("Bookings list for user " + id + " is empty");
-        }
-        return bookings;
+        return bookingRepository.getBookingsByUserId(user.getId()).stream().map(bookingMapper::toDto).collect(Collectors.toList());
     }
 
     @Override
     public List<BookingDto> getBookingByRoomId(Long id) {
         RoomDto room = roomService.getRoomById(id);
-        List<BookingDto> bookings = bookingRepository.getBookingsByRoomId(room.getId()).stream().map(bookingMapper::toDto).collect(Collectors.toList());
-        if (bookings.size() == 0) {
-            throw new BookingException("Bookings list for room " + id + " is empty");
-        }
-        return bookings;
+        return bookingRepository.getBookingsByRoomId(room.getId()).stream().map(bookingMapper::toDto).collect(Collectors.toList());
     }
 
     @Override
     public void deleteAllBookings() {
-        List<BookingDto> bookingList = bookingRepository.getAllBookings().stream().map(bookingMapper::toDto).collect(Collectors.toList());
-        if (bookingList.size() == 0) {
-            throw new BookingException("Bookings list is empty");
-        }
         bookingRepository.deleteAllBookings();
     }
 
@@ -87,6 +84,14 @@ public class BookingServiceImpl implements BookingService {
         BookingDto tempBooking = bookingMapper.toDto(Optional.ofNullable(bookingRepository.getBookingById(id))
                 .orElseThrow(() -> new BookingException("Booking not found")));
         bookingRepository.deleteBookingById(tempBooking.getId());
+    }
+
+    public void deleteBookingById(Long id, Long userId) {
+        BookingDto bookingDto = getBookingByUserId(userId).stream()
+                .filter(booking -> booking.getId().equals(id))
+                .findFirst()
+                .orElseThrow(() -> new BookingException("Booking not found"));
+        bookingRepository.deleteBookingById(bookingDto.getId());
     }
 
     private Booking validateBooking(Room room, User user, BookingDto bookingDto) {

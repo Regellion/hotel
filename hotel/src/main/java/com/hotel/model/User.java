@@ -22,6 +22,15 @@ public class User {
     @Column(name = "user_name")
     private String name;
 
+    @Column(name = "login")
+    private String login;
+
+    @Column(name = "password")
+    private String password;
+
+    @Column(name = "role")
+    private String role;
+
     @Column(name = "delete_time")
     private Date deleteTime;
 

@@ -25,11 +25,7 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     public List<RoomDto> getAllRooms() {
-        List<RoomDto> roomList = roomRepository.getAllRooms().stream().map(roomMapper::toDto).collect(Collectors.toList());
-        if (roomList.size() == 0) {
-            throw new RoomException("Room list is empty");
-        }
-        return roomList;
+        return roomRepository.getAllRooms().stream().map(roomMapper::toDto).collect(Collectors.toList());
     }
 
     @Override
@@ -45,10 +41,6 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     public void deleteAllRooms() {
-        List<RoomDto> roomList = roomRepository.getAllRooms().stream().map(roomMapper::toDto).collect(Collectors.toList());
-        if (roomList.size() == 0) {
-            throw new RoomException("Rooms list is empty");
-        }
         roomRepository.deleteAllRooms();
     }
 

@@ -16,6 +16,8 @@ public interface BookingRepository {
 
     List<Booking> getAllBookings();
 
+    List<Booking> getFullBookingsList();
+
     void deleteBookingById(Long id);
 
     void deleteAllBookings();

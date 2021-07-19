@@ -17,4 +17,8 @@ public interface UserService {
     void deleteAllUsers();
 
     void deleteUserById(Long id);
+
+    long getIdByUsername(String username);
+
+    UserDto loadUserByUsername(String login);
 }
