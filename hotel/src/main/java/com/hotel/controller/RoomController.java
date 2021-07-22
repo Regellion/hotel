@@ -2,15 +2,16 @@ package com.hotel.controller;
 
 import com.hotel.dto.RoomDto;
 import com.hotel.service.RoomService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
+@AllArgsConstructor
 public class RoomController {
-    @Autowired
-    private RoomService roomService;
+
+    private final RoomService roomService;
 
     @GetMapping("/rooms")
     public List<RoomDto> showAllRooms() {
@@ -18,29 +19,29 @@ public class RoomController {
     }
 
     @GetMapping("/rooms/{id}")
-    public RoomDto getUser(@PathVariable long id) {
+    public RoomDto getRoom(@PathVariable long id) {
         return roomService.getRoomById(id);
     }
 
-    @PostMapping("/rooms")
+    @PostMapping("/admin/rooms")
     public RoomDto addRoom(@RequestBody RoomDto room) {
-        roomService.createRoom(new RoomDto(room.getUnderRenovation(), room.getPrice()));
+        roomService.createRoom(room);
         return room;
     }
 
-    @PutMapping("/rooms/{id}")
+    @PutMapping("/admin/rooms/{id}")
     public RoomDto updateRoom(@PathVariable long id, @RequestBody RoomDto room) {
-        roomService.updateRoomById(id, new RoomDto(room.getUnderRenovation(), room.getPrice()));
+        roomService.updateRoomById(id, room);
         return room;
     }
 
-    @DeleteMapping("/rooms/{id}")
+    @DeleteMapping("/admin/rooms/{id}")
     public String deleteById(@PathVariable long id) {
         roomService.deleteRoomById(id);
         return "Room with ID = " + id + " was deleted";
     }
 
-    @DeleteMapping("/rooms")
+    @DeleteMapping("/admin/rooms")
     public String deleteAllRooms() {
         roomService.deleteAllRooms();
         return "All rooms was deleted";

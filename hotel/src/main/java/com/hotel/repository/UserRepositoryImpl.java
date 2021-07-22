@@ -108,4 +108,19 @@ public class UserRepositoryImpl implements UserRepository {
         }
         return tempUser;
     }
+
+    @Override
+    public User findByLogin(String login) {
+        User user = null;
+        long start = System.currentTimeMillis();
+        try (Session session = sessionFactory.getCurrentSession()) {
+            session.beginTransaction();
+            user = (User) session.createQuery("FROM User WHERE login = '" + login + "'").getSingleResult();
+            session.getTransaction().commit();
+        } catch (HibernateException e) {
+            sessionFactory.getCurrentSession().getTransaction().rollback();
+            System.err.println(formatter.format(start) + " ERROR in class " + this.getClass().getName() + ": Error retrieving data from the database. " + e);
+        }
+        return user;
+    }
 }

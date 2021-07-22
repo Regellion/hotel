@@ -67,6 +67,9 @@
     <orderEntry type="library" name="Maven: org.springframework:spring-context:5.2.9.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: org.springframework:spring-expression:5.2.9.RELEASE" level="project" />
     <orderEntry type="library" name="Maven: org.springframework:spring-web:5.2.9.RELEASE" level="project" />
+    <orderEntry type="library" name="Maven: org.springframework.security:spring-security-web:5.4.1" level="project" />
+    <orderEntry type="library" name="Maven: org.springframework.security:spring-security-core:5.4.1" level="project" />
+    <orderEntry type="library" name="Maven: org.springframework.security:spring-security-config:5.4.1" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: javax.servlet:javax.servlet-api:4.0.1" level="project" />
     <orderEntry type="library" name="Maven: org.apache.tomcat:tomcat-dbcp:10.0.5" level="project" />
     <orderEntry type="library" name="Maven: org.apache.tomcat:tomcat-juli:10.0.5" level="project" />
@@ -77,5 +80,6 @@
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.projectlombok:lombok:1.18.20" level="project" />
     <orderEntry type="library" name="Maven: javax.servlet:jstl:1.2" level="project" />
     <orderEntry type="library" name="Maven: org.modelmapper:modelmapper:2.4.4" level="project" />
+    <orderEntry type="library" name="Maven: io.jsonwebtoken:jjwt:0.9.1" level="project" />
   </component>
 </module>

@@ -8,7 +8,11 @@ public interface BookingService {
 
     BookingDto saveBooking(BookingDto bookingDto);
 
+    BookingDto saveBooking(Long userId, BookingDto bookingDto);
+
     List<BookingDto> getAllBookings();
+
+    List<BookingDto> getFullBookingsList();
 
     BookingDto getBookingById(Long id);
 
@@ -19,4 +23,6 @@ public interface BookingService {
     void deleteAllBookings();
 
     void deleteBookingById(Long id);
+
+    void deleteBookingById(Long id, Long userId);
 }

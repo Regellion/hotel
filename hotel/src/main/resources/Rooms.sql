@@ -2,17 +2,20 @@ CREATE SCHEMA senla_traineeship DEFAULT CHARACTER SET utf8;
 
 CREATE TABLE senla_traineeship.rooms
 (
-    id             INT     NOT NULL AUTO_INCREMENT,
-    room_status    INT     NOT NULL,
-    room_price     INT,
+    id          INT NOT NULL AUTO_INCREMENT,
+    room_status INT NOT NULL,
+    room_price  INT,
     delete_time DATE,
     PRIMARY KEY (id)
 );
 
 CREATE TABLE senla_traineeship.users
 (
-    id        INT          NOT NULL AUTO_INCREMENT,
-    user_name VARCHAR(200) NOT NULL,
+    id          INT          NOT NULL AUTO_INCREMENT,
+    user_name   VARCHAR(200) NOT NULL,
+    login       VARCHAR(200) NOT NULL,
+    password    VARCHAR(200) NOT NULL,
+    role        VARCHAR(200) NOT NULL,
     delete_time DATE,
     PRIMARY KEY (ID)
 );

@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.query.NativeQuery;
+import org.springframework.jdbc.object.SqlQuery;
 import org.springframework.stereotype.Repository;
 
 import java.text.SimpleDateFormat;
@@ -85,6 +87,21 @@ public class BookingRepositoryImpl implements BookingRepository {
         try (Session session = sessionFactory.getCurrentSession()) {
             session.beginTransaction();
             bookings = session.createQuery("FROM Booking ").getResultList();
+            session.getTransaction().commit();
+        } catch (HibernateException e) {
+            sessionFactory.getCurrentSession().getTransaction().rollback();
+            System.err.println(formatter.format(start) + " ERROR in class " + this.getClass().getName() + ": Error retrieving data from the database. " + e);
+        }
+        return bookings;
+    }
+
+    @Override
+    public List<Booking> getFullBookingsList() {
+        List<Booking> bookings = new ArrayList<>();
+        long start = System.currentTimeMillis();
+        try (Session session = sessionFactory.getCurrentSession()) {
+            session.beginTransaction();
+            bookings.addAll(session.createSQLQuery("SELECT * FROM senla_traineeship.bookings").addEntity(Booking.class).list());
             session.getTransaction().commit();
         } catch (HibernateException e) {
             sessionFactory.getCurrentSession().getTransaction().rollback();

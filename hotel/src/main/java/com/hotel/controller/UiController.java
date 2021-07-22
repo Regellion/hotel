@@ -6,7 +6,7 @@ import com.hotel.dto.UserDto;
 import com.hotel.service.BookingService;
 import com.hotel.service.RoomService;
 import com.hotel.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,14 +17,12 @@ import java.util.List;
 
 @Controller
 @RequestMapping("/ui")
+@AllArgsConstructor
 public class UiController {
 
-    @Autowired
-    private BookingService bookingService;
-    @Autowired
-    private UserService userService;
-    @Autowired
-    private RoomService roomService;
+    private final BookingService bookingService;
+    private final UserService userService;
+    private final RoomService roomService;
 
     @RequestMapping("/bookings")
     public ModelAndView showAllBookings(ModelAndView modelAndView) {
