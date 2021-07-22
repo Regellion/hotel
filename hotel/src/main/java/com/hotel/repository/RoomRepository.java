@@ -1,20 +1,7 @@
 package com.hotel.repository;
 
 import com.hotel.model.Room;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
-
-public interface RoomRepository {
-
-    Room saveRoom(Room room);
-
-    Room getRoomById(Long id);
-
-    List<Room> getAllRooms();
-
-    void deleteRoomById(Long id);
-
-    void deleteAllRooms();
-
-    Room updateRoomById(Room room);
+public interface RoomRepository extends JpaRepository<Room, Long> {
 }

@@ -2,16 +2,16 @@ package com.hotel.mapper;
 
 import com.hotel.dto.UserDto;
 import com.hotel.model.User;
+import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
 @Component
+@AllArgsConstructor
 public class UserMapper {
-    @Autowired
-    private ModelMapper modelMapper;
+    private final ModelMapper modelMapper;
 
     public User toEntity(UserDto userDto) {
         return Objects.isNull(userDto) ? null : modelMapper.map(userDto, User.class);

@@ -7,7 +7,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-
 import java.util.List;
 
 @RestController
@@ -39,16 +38,17 @@ public class UserController {
         return user;
     }
 
-    @PutMapping("/admin/users/{id}")
-    public UserDto updateUser(@PathVariable long id, @RequestBody UserDto user) {
-        userService.updateUserById(id, user);
+    @PutMapping("/admin/users")
+    public UserDto adminUpdateUser(@RequestBody UserDto user) {
+        userService.createUser(user);
         return user;
     }
 
     @PutMapping("/users")
     public UserDto updateUser(@RequestBody UserDto user) {
         long currentUserId = ((JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId();
-        return updateUser(currentUserId, user);
+        user.setId(currentUserId);
+        return adminUpdateUser(user);
     }
 
 

@@ -1,11 +1,11 @@
 package com.hotel.service;
 
+import com.hotel.dto.BookingDto;
 import com.hotel.dto.RoomDto;
 import com.hotel.dto.UserDto;
 import com.hotel.exception.BookingException;
 import com.hotel.exception.RoomException;
 import com.hotel.mapper.BookingMapper;
-import com.hotel.dto.BookingDto;
 import com.hotel.mapper.RoomMapper;
 import com.hotel.mapper.UserMapper;
 import com.hotel.model.Booking;
@@ -13,13 +13,16 @@ import com.hotel.model.Room;
 import com.hotel.model.User;
 import com.hotel.repository.BookingRepository;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 @AllArgsConstructor
 public class BookingServiceImpl implements BookingService {
     private final BookingMapper bookingMapper;
@@ -31,89 +34,118 @@ public class BookingServiceImpl implements BookingService {
     private final RoomService roomService;
 
     @Override
-    public BookingDto saveBooking(BookingDto bookingDto) {
+    @Transactional
+    public void saveBooking(BookingDto bookingDto) {
         Booking validateBooking = validateBooking(roomMapper.toEntity(roomService.getRoomById(bookingDto.getRoom().getId())),
-                userMapper.toEntity(userService.getUserById(bookingDto.getUser().getId())), bookingDto);
-        return bookingMapper.toDto(Optional.ofNullable(bookingRepository.saveBooking(validateBooking))
-                .orElseThrow(() -> new BookingException("Booking failed")));
+                userMapper.toEntity(userService.getUserById(bookingDto.getUser().getId())), bookingMapper.toEntity(bookingDto));
+        bookingRepository.save(validateBooking);
+        log.info("In saveBooking - booking: {} successfully registered", bookingDto);
     }
 
-    public BookingDto saveBooking(Long userId, BookingDto bookingDto) {
+    @Override
+    @Transactional
+    public void saveBooking(Long userId, BookingDto bookingDto) {
         bookingDto.setUser(userService.getUserById(userId));
         Booking validateBooking = validateBooking(roomMapper.toEntity(roomService.getRoomById(bookingDto.getRoom().getId())),
-                userMapper.toEntity(userService.getUserById(bookingDto.getUser().getId())), bookingDto);
-        return bookingMapper.toDto(Optional.ofNullable(bookingRepository.saveBooking(validateBooking))
-                .orElseThrow(() -> new BookingException("Booking failed")));
+                userMapper.toEntity(userService.getUserById(bookingDto.getUser().getId())), bookingMapper.toEntity(bookingDto));
+        bookingRepository.save(validateBooking);
+        log.info("In saveBooking - booking: {} successfully registered", bookingDto);
     }
 
     @Override
     public List<BookingDto> getAllBookings() {
-        return bookingRepository.getAllBookings().stream().map(bookingMapper::toDto).collect(Collectors.toList());
+        List<Booking> bookingList = bookingRepository.findAll();
+        log.info("In getAllBookings - {} booking(s) found", bookingList.size());
+        return bookingList.stream()
+                .filter(booking -> booking.getRoom().getDeleteTime() == null && booking.getUser().getDeleteTime() == null)
+                .map(bookingMapper::toDto).collect(Collectors.toList());
     }
 
     @Override
     public List<BookingDto> getFullBookingsList() {
-        return bookingRepository.getFullBookingsList().stream().map(bookingMapper::toDto).collect(Collectors.toList());
+        List<Booking> bookingList = bookingRepository.getFullBookingsList();
+        log.info("In getFullBookingsList - {} booking(s) found", bookingList.size());
+        return bookingList.stream().map(bookingMapper::toDto).collect(Collectors.toList());
     }
 
     @Override
     public BookingDto getBookingById(Long id) {
-        return bookingMapper.toDto(
-                Optional.ofNullable(bookingRepository.getBookingById(id)).orElseThrow(() -> new BookingException("Booking not found")));
+        Booking booking = bookingRepository.findById(id).orElse(null);
+        if(booking == null) {
+            log.warn("In getBookingById booking with id: {} not found", id);
+            throw new BookingException("Booking not found");
+        }
+        return bookingMapper.toDto(booking);
     }
 
     @Override
     public List<BookingDto> getBookingByUserId(Long id) {
         UserDto user = userService.getUserById(id);
-        return bookingRepository.getBookingsByUserId(user.getId()).stream().map(bookingMapper::toDto).collect(Collectors.toList());
+        List<Booking> bookingList = bookingRepository.findBookingByUserId(user.getId());
+        log.info("In getBookingByUserId - {} booking(s) found", bookingList.size());
+        return bookingList.stream().map(bookingMapper::toDto).collect(Collectors.toList());
     }
 
     @Override
     public List<BookingDto> getBookingByRoomId(Long id) {
         RoomDto room = roomService.getRoomById(id);
-        return bookingRepository.getBookingsByRoomId(room.getId()).stream().map(bookingMapper::toDto).collect(Collectors.toList());
+        List<Booking> bookingList = bookingRepository.findBookingByRoomId(room.getId());
+        log.info("In getBookingByRoomId - {} booking(s) found", bookingList.size());
+        return bookingList.stream().map(bookingMapper::toDto).collect(Collectors.toList());
     }
 
     @Override
+    @Transactional
     public void deleteAllBookings() {
-        bookingRepository.deleteAllBookings();
+        bookingRepository.findAll().forEach(booking -> {
+            booking.setDeleteTime(new Date());
+            bookingRepository.save(booking);
+        });
+        log.info("In deleteAllBookings all booking(s) delete");
     }
 
     @Override
+    @Transactional
     public void deleteBookingById(Long id) {
-        BookingDto tempBooking = bookingMapper.toDto(Optional.ofNullable(bookingRepository.getBookingById(id))
-                .orElseThrow(() -> new BookingException("Booking not found")));
-        bookingRepository.deleteBookingById(tempBooking.getId());
+        Booking booking = bookingRepository.findById(id).orElse(null);
+        if(booking == null) {
+            log.warn("In deleteBookingById - booking with id: {} not found", id);
+            throw new BookingException("Booking not found");
+        }
+        booking.setDeleteTime(new Date());
+        bookingRepository.save(booking);
     }
 
+    @Override
+    @Transactional
     public void deleteBookingById(Long id, Long userId) {
-        BookingDto bookingDto = getBookingByUserId(userId).stream()
-                .filter(booking -> booking.getId().equals(id))
-                .findFirst()
-                .orElseThrow(() -> new BookingException("Booking not found"));
-        bookingRepository.deleteBookingById(bookingDto.getId());
+        Booking booking = bookingMapper.toEntity(getBookingByUserId(userId).stream()
+                .filter(tempBooking -> tempBooking.getId().equals(id))
+                .findFirst().orElse(null));
+        if(booking == null) {
+            log.warn("In deleteBookingById - booking with user id {} not found", userId);
+            throw new BookingException("Booking not found");
+        }
+        booking.setDeleteTime(new Date());
+        bookingRepository.save(booking);
     }
 
-    private Booking validateBooking(Room room, User user, BookingDto bookingDto) {
+    private Booking validateBooking(Room room, User user, Booking booking) {
         if (room.getUnderRenovation()) {
+            log.warn("In validateBooking - booking {} is under renovation", booking);
             throw new RoomException("The room is unavailable.");
         }
-        List<BookingDto> bookings = bookingRepository.getBookingsByRoomId(bookingDto.getRoom().getId()).stream().map(bookingMapper::toDto).collect(Collectors.toList());
-        Optional<BookingDto> roomIsBooked = bookings.stream()
-                .filter(b -> (bookingDto.getStartDate().after(b.getStartDate()) && bookingDto.getStartDate().before(b.getEndDate())
-                        || (bookingDto.getEndDate().after(b.getStartDate()) && bookingDto.getEndDate().before(b.getEndDate()))
-                        || (b.getStartDate().after(bookingDto.getStartDate()) && b.getStartDate().before(bookingDto.getEndDate())))
-                        || (b.getEndDate().after(bookingDto.getStartDate()) && b.getEndDate().before(bookingDto.getEndDate()))
-                        || (b.getStartDate().getTime() == bookingDto.getStartDate().getTime() || b.getStartDate().getTime() == bookingDto.getEndDate().getTime())
-                        || (b.getEndDate().getTime() == bookingDto.getStartDate().getTime() || b.getEndDate().getTime() == bookingDto.getEndDate().getTime()))
-                .findFirst();
-        if (roomIsBooked.isPresent()) {
+        int notValidBookingDates = bookingRepository.validate(booking.getRoom().getId(), booking.getStartDate(), booking.getEndDate());
+        if (notValidBookingDates == 1) {
+            log.warn("In validateBooking incorrect booking dates.");
             throw new BookingException("Incorrect booking dates.");
         }
-        Booking booking = new Booking(room, user, bookingDto.getStartDate(), bookingDto.getEndDate());
-        if (booking.getStartDate().after(booking.getEndDate())) {
+        Booking tempBooking = new Booking(room, user, booking.getStartDate(), booking.getEndDate());
+        if (tempBooking.getStartDate().after(tempBooking.getEndDate())) {
+            log.warn("In validateBooking start date {} is after end dates {}", tempBooking.getStartDate(), booking.getEndDate());
             throw new BookingException("Start date is after end date.");
         }
-        return booking;
+        log.info("In validateBooking booking: {} validate successful", tempBooking);
+        return tempBooking;
     }
 }
