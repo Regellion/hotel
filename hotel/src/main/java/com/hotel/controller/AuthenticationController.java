@@ -30,7 +30,7 @@ public class AuthenticationController {
     public ResponseEntity login(@RequestBody UserDto userDto) {
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userDto.getLogin(), userDto.getPassword()));
-            UserDto user = userService.loadUserByUsername(userDto.getLogin());
+            UserDto user = userService.loadUserByLogin(userDto.getLogin());
             if (user == null) {
                 throw new UsernameNotFoundException("User with username: " + userDto.getLogin() + " not found");
             }

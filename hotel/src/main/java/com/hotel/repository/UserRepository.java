@@ -1,22 +1,10 @@
 package com.hotel.repository;
 
 import com.hotel.model.User;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
+import java.util.Optional;
 
-public interface UserRepository {
-
-    User saveUser(User user);
-
-    User getUserById(Long id);
-
-    List<User> getAllUsers();
-
-    void deleteUserById(Long id);
-
-    void deleteAllUsers();
-
-    User updateUserById(User user);
-
-    User findByLogin(String login);
+public interface UserRepository extends JpaRepository<User, Long> {
+    Optional<User> findUserByLogin(String login);
 }

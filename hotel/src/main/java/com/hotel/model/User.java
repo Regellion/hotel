@@ -1,5 +1,7 @@
 package com.hotel.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Where;
@@ -11,6 +13,8 @@ import java.util.Date;
 @Table(name = "users")
 @Where(clause = "delete_time IS NULL")
 @Data
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor
 public class User {
 
