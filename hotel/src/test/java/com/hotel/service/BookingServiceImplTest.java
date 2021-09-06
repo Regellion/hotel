@@ -1,6 +1,8 @@
 package com.hotel.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hotel.dto.BookingDto;
+import com.hotel.dto.BookingReceiptDto;
 import com.hotel.exception.BookingException;
 import com.hotel.exception.RoomException;
 import com.hotel.exception.UserException;
@@ -21,7 +23,9 @@ import org.junit.rules.ExpectedException;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -36,6 +40,9 @@ class BookingServiceImplTest {
     ModelMapper modelMapper;
     RoomMapper roomMapper;
     UserMapper userMapper;
+    ObjectMapper objectMapper;
+    KafkaTemplate<Long, BookingReceiptDto> kafkaTemplate;
+    RestTemplate restTemplate;
     @Mock
     BCryptPasswordEncoder passwordEncoder;
     @Mock
@@ -56,13 +63,15 @@ class BookingServiceImplTest {
 
     @BeforeEach
     void init() {
+        objectMapper = new ObjectMapper();
         modelMapper = new ModelMapper();
         roomMapper = new RoomMapper(modelMapper);
         userMapper = new UserMapper(modelMapper);
         bookingMapper = new BookingMapper(modelMapper);
         userService = new UserServiceImpl(userRepository, bookingRepository, userMapper, passwordEncoder);
         roomService = new RoomServiceImpl(roomRepository, roomMapper, bookingRepository);
-        bookingService = new BookingServiceImpl(bookingMapper, roomMapper, userMapper, bookingRepository, userService, roomService);
+        bookingService = new BookingServiceImpl(bookingMapper, objectMapper, roomMapper, userMapper,
+                kafkaTemplate, restTemplate, bookingRepository, userService, roomService);
     }
 
     @Test
@@ -77,7 +86,8 @@ class BookingServiceImplTest {
 
         when(roomRepository.findById(booking.getRoom().getId())).thenReturn(Optional.of(room));
         when(userRepository.findById(booking.getUser().getId())).thenReturn(Optional.of(user));
-        bookingService.saveBooking(bookingMapper.toDto(booking));
+        Throwable throwable = assertThrows(NullPointerException.class, () -> bookingService.saveBooking(bookingMapper.toDto(booking)));
+        assertNull(throwable.getMessage());
         verify(bookingRepository, times(1)).save(any(Booking.class));
     }
 
@@ -117,7 +127,8 @@ class BookingServiceImplTest {
 
         when(roomRepository.findById(booking.getRoom().getId())).thenReturn(Optional.of(room));
         when(userRepository.findById(booking.getUser().getId())).thenReturn(Optional.of(user));
-        bookingService.saveBooking(bookingMapper.toDto(booking));
+        Throwable throwable = assertThrows(NullPointerException.class, ()-> bookingService.saveBooking(bookingMapper.toDto(booking)));
+        assertNull(throwable.getMessage());
         verify(bookingRepository, times(1)).save(any(Booking.class));
 
         Booking booking2 = Booking.builder().id(2L).startDate(startDate).endDate(endDate).user(user).room(room).build();
@@ -162,8 +173,8 @@ class BookingServiceImplTest {
 
         when(roomRepository.findById(booking.getRoom().getId())).thenReturn(Optional.of(room));
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-        bookingService.saveBooking(1L, bookingMapper.toDto(booking));
-        verify(bookingRepository, times(1)).save(any(Booking.class));
+        Throwable throwable = assertThrows(NullPointerException.class, ()-> bookingService.saveBooking(1L, bookingMapper.toDto(booking)));
+        assertNull(throwable.getMessage());
         assertEquals("testPass", booking.getUser().getPassword());
 
         Throwable thrown = assertThrows(UserException.class, () -> bookingService.saveBooking(2L, bookingMapper.toDto(booking)));
@@ -211,8 +222,8 @@ class BookingServiceImplTest {
 
         when(bookingRepository.getFullBookingsList()).thenReturn(
                 bookings.stream()
-                    .filter(booking1 -> booking1.getDeleteTime() != null)
-                    .collect(Collectors.toList()));
+                        .filter(booking1 -> booking1.getDeleteTime() != null)
+                        .collect(Collectors.toList()));
         List<BookingDto> allBookingsDtoList = bookingService.getFullBookingsList();
         assertEquals(2, allBookingsDtoList.size());
         verify(bookingRepository, times(1)).getFullBookingsList();

@@ -30,7 +30,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .authorizeRequests()
                 .antMatchers("/api/login", "/ui/**").permitAll()
-                .antMatchers("/users", "/rooms", "/rooms/{id}", "/bookings", "/bookings/{id}").hasAnyAuthority("USER", "ADMIN")
+                .antMatchers("/users", "/rooms", "/rooms/{id}", "/bookings", "/bookings/{id}", "/bookings/receipt/{fileName}").hasAnyAuthority("USER", "ADMIN")
                 .antMatchers("/admin/**").hasAuthority("ADMIN")
                 .anyRequest().authenticated()
                 .and()

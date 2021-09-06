@@ -1,0 +1,132 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="1.0.0" author="artem.martynov">
+        <createTable tableName="users">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_name" type="VARCHAR(200)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="login" type="VARCHAR(200)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="password" type="VARCHAR(200)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role" type="VARCHAR(200)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="delete_time" type="DATE">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="1.0.1" author="artem.martynov">
+        <createTable tableName="rooms">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="room_status" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="room_price" type="INT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="delete_time" type="DATE">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="1.0.2" author="artem.martynov">
+        <createTable tableName="bookings">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="room_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="start_date" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="end_date" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="receipt_name" type="VARCHAR(400)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="delete_time" type="DATE">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="1.0.3" author="artem.martynov">
+        <addForeignKeyConstraint baseTableName="bookings"
+                                 baseColumnNames="room_id"
+                                 constraintName="fk_bookings_room_id"
+                                 referencedTableName="rooms"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+    <changeSet id="1.0.4" author="artem.martynov">
+        <addForeignKeyConstraint baseTableName="bookings"
+                                 baseColumnNames="user_id"
+                                 constraintName="fk_bookings_user_id"
+                                 referencedTableName="users"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+    <changeSet id="1.0.5" author="artem.martynov" context="all" runOnChange="true">
+        <sqlFile path="/sql/validate_booking_date.sql" splitStatements="false"/>
+    </changeSet>
+    <changeSet id="1.0.6" author="artem.martynov">
+        <insert tableName="rooms">
+            <column name="id" value="1"/>
+            <column name="room_status" value="0"/>
+            <column name="room_price" value="1000"/>
+        </insert>
+        <insert tableName="rooms">
+            <column name="id" value="2"/>
+            <column name="room_status" value="0"/>
+            <column name="room_price" value="1000"/>
+        </insert>
+        <insert tableName="rooms">
+            <column name="id" value="3"/>
+            <column name="room_status" value="0"/>
+            <column name="room_price" value="1001"/>
+            <column name="delete_time" value="2021-07-30"/>
+        </insert>
+        <insert tableName="users">
+            <column name="id" value="1"/>
+            <column name="user_name" value="Atrem Martynov"/>
+            <column name="login" value="amerta"/>
+            <column name="password" value="$2a$10$IPxt0XVb9r18lL7.hcW3xuBW3FdrCXAdczcZuUVkadDuM7y9oWufa"/>
+            <column name="role" value="ADMIN"/>
+        </insert>
+        <insert tableName="users">
+            <column name="id" value="2"/>
+            <column name="user_name" value="Atrem Martynov2"/>
+            <column name="login" value="amerta90"/>
+            <column name="password" value="$2a$04$2El5TbiSBP00DTcWTcRbQOSaP2I3i88wy.4.n3uCM5K2MTntajsDi"/>
+            <column name="role" value="USER"/>
+        </insert>
+        <insert tableName="users">
+            <column name="id" value="3"/>
+            <column name="user_name" value="Atrem Martynov3"/>
+            <column name="login" value="amerta99"/>
+            <column name="password" value="$2a$10$LCav92DW4.iHPN7/U2Fxf.WI2PzlLs8kzbcRBKuTO1ZehTG7zmIuK"/>
+            <column name="role" value="USER"/>
+        </insert>
+        <insert tableName="users">
+            <column name="id" value="4"/>
+            <column name="user_name" value="Atrem Martynov4"/>
+            <column name="login" value="amerta100"/>
+            <column name="password" value="$2a$10$LCav92DW4.iHPN7/U2Fxf.WI2PzlLs8kzbcRBKuTO1ZehTG7zmIuK"/>
+            <column name="role" value="USER"/>
+            <column name="delete_time" value="2021-09-01"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>

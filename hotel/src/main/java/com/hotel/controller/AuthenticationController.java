@@ -27,7 +27,7 @@ public class AuthenticationController {
     private final UserService userService;
 
     @PostMapping("/api/login")
-    public ResponseEntity login(@RequestBody UserDto userDto) {
+    public ResponseEntity<Map<Object, Object>> login(@RequestBody UserDto userDto) {
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userDto.getLogin(), userDto.getPassword()));
             UserDto user = userService.loadUserByLogin(userDto.getLogin());

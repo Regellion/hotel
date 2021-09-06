@@ -4,6 +4,10 @@ import com.hotel.configuration.security.JwtUser;
 import com.hotel.dto.BookingDto;
 import com.hotel.service.BookingService;
 import lombok.AllArgsConstructor;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -75,5 +79,15 @@ public class BookingController {
     public String deleteAllBookings() {
         bookingService.deleteAllBookings();
         return "All bookings was deleted";
+    }
+
+    @GetMapping("/bookings/receipt/{fileName}")
+    public ResponseEntity<Resource> downloadReceipt(@PathVariable String fileName) {
+        long currentUserId = ((JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId();
+        InputStreamResource resource = bookingService.downloadReceipt(currentUserId, fileName);
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(resource);
     }
 }

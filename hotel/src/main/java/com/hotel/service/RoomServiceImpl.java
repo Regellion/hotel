@@ -40,7 +40,7 @@ public class RoomServiceImpl implements RoomService {
     @Override
     public RoomDto getRoomById(Long id) {
         Room room = roomRepository.findById(id).orElse(null);
-        if(room == null){
+        if (room == null) {
             log.warn("In getRoomById - room by room id {} is not found", id);
             throw new RoomException("Room not found");
         }
@@ -66,7 +66,7 @@ public class RoomServiceImpl implements RoomService {
     @Transactional
     public void deleteRoomById(Long id) {
         Room room = roomRepository.findById(id).orElse(null);
-        if(room == null) {
+        if (room == null) {
             log.warn("In deleteRoomById room with id: {} not found", id);
             throw new RoomException("Room not found");
         }

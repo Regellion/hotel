@@ -28,7 +28,6 @@ public class UserController {
     @GetMapping("/users")
     public UserDto getUser() {
         long currentUserId = ((JwtUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId();
-        System.out.println(currentUserId);
         return getUser(currentUserId);
     }
 

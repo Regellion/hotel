@@ -46,7 +46,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto getUserById(Long id) {
         User user = userRepository.findById(id).orElse(null);
-        if(user == null) {
+        if (user == null) {
             log.warn("In getUserById user with id: {} not found", id);
             throw new UserException("User not found");
         }
@@ -72,7 +72,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void deleteUserById(Long id) {
         User user = userRepository.findById(id).orElse(null);
-        if(user == null) {
+        if (user == null) {
             log.warn("In deleteUserById user with id: {} not found", id);
             throw new UserException("User not found");
         }
@@ -88,7 +88,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto loadUserByLogin(String login) {
         User user = userRepository.findUserByLogin(login).orElse(null);
-        if(user == null) {
+        if (user == null) {
             log.warn("In loadUserByLogin user by login: {} not found", login);
             throw new UserException("User with login: " + login + " not found");
         }

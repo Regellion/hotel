@@ -36,6 +36,9 @@ public class Booking {
     @Column(name = "end_date")
     private Date endDate;
 
+    @Column(name = "receipt_name")
+    private String receiptName;
+
     public Booking(Room room, User user, Date startDate, Date endDate) {
         this.room = room;
         this.user = user;
@@ -52,6 +55,7 @@ public class Booking {
                 ", startDate=" + startDate +
                 ", endDate=" + endDate +
                 ", deleteTime=" + (deleteTime == null ? "N/A" : deleteTime) +
+                ", receiptName=" + (receiptName == null ? "N/A" : receiptName) +
                 '}';
     }
 }
