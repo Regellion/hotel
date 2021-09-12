@@ -84,7 +84,7 @@ class UserServiceImplTest {
 
         UserDto userDto = userService.getUserById(1L);
 
-        assertEquals(userDto, userMapper.toDto(user));
+        assertEquals(userDto, UserDto.createUserDto(user));
         verify(userRepository, times(1)).findById(1L);
 
         Throwable thrown = assertThrows(UserException.class, () -> userService.getUserById(2L));

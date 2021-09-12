@@ -1,24 +1,30 @@
 package com.hotel.dto;
 
+import com.hotel.model.Booking;
 import lombok.*;
 
 import java.util.Date;
 
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class BookingDto {
     private Long id;
-    private RoomDto room;
-    private UserDto user;
+    private Long roomId;
+    private Long userId;
     private Date startDate;
     private Date endDate;
     private String receiptName;
 
-    public BookingDto(RoomDto room, UserDto user, Date startDate, Date endDate, String receiptName) {
-        this.room = room;
-        this.user = user;
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.receiptName = receiptName;
+    public static BookingDto createBookingDto(Booking booking) {
+        return BookingDto.builder()
+                .id(booking.getId())
+                .endDate(booking.getEndDate())
+                .startDate(booking.getStartDate())
+                .roomId(booking.getRoom().getId())
+                .userId(booking.getUser().getId())
+                .receiptName(booking.getReceiptName())
+                .build();
     }
 }

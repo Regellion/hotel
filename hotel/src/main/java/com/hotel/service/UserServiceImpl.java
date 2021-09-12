@@ -40,7 +40,7 @@ public class UserServiceImpl implements UserService {
     public List<UserDto> getAllUsers() {
         List<User> userList = userRepository.findAll();
         log.info("In getAllUsers - {} user(s) found", userList.size());
-        return userList.stream().map(userMapper::toDto).collect(Collectors.toList());
+        return userList.stream().map(UserDto::createUserDto).collect(Collectors.toList());
     }
 
     @Override
@@ -51,7 +51,7 @@ public class UserServiceImpl implements UserService {
             throw new UserException("User not found");
         }
         log.info("In getUserById - user: {} found by user id {}", user, id);
-        return userMapper.toDto(user);
+        return UserDto.createUserDto(user);
     }
 
     @Override

@@ -51,8 +51,8 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public void saveBooking(BookingDto bookingDto) {
-        Booking validateBooking = validateBooking(roomMapper.toEntity(roomService.getRoomById(bookingDto.getRoom().getId())),
-                userMapper.toEntity(userService.getUserById(bookingDto.getUser().getId())), bookingMapper.toEntity(bookingDto));
+        Booking validateBooking = validateBooking(roomMapper.toEntity(roomService.getRoomById(bookingDto.getRoomId())),
+                userMapper.toEntity(userService.getUserById(bookingDto.getUserId())), bookingMapper.toEntity(bookingDto));
         bookingRepository.save(validateBooking);
         log.info("In saveBooking - booking: {} successfully registered", bookingDto);
         sendBookingReceiptDto(validateBooking, kafkaTemplate);
@@ -61,9 +61,9 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public void saveBooking(Long userId, BookingDto bookingDto) {
-        bookingDto.setUser(userService.getUserById(userId));
-        Booking validateBooking = validateBooking(roomMapper.toEntity(roomService.getRoomById(bookingDto.getRoom().getId())),
-                userMapper.toEntity(userService.getUserById(bookingDto.getUser().getId())), bookingMapper.toEntity(bookingDto));
+        bookingDto.setUserId(userService.getUserById(userId).getId());
+        Booking validateBooking = validateBooking(roomMapper.toEntity(roomService.getRoomById(bookingDto.getRoomId())),
+                userMapper.toEntity(userService.getUserById(bookingDto.getUserId())), bookingMapper.toEntity(bookingDto));
         bookingRepository.save(validateBooking);
         log.info("In saveBooking - booking: {} successfully registered", bookingDto);
         sendBookingReceiptDto(validateBooking, kafkaTemplate);
@@ -75,14 +75,16 @@ public class BookingServiceImpl implements BookingService {
         log.info("In getAllBookings - {} booking(s) found", bookingList.size());
         return bookingList.stream()
                 .filter(booking -> booking.getRoom().getDeleteTime() == null && booking.getUser().getDeleteTime() == null)
-                .map(bookingMapper::toDto).collect(Collectors.toList());
+                .map(BookingDto::createBookingDto)
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<BookingDto> getFullBookingsList() {
         List<Booking> bookingList = bookingRepository.getFullBookingsList();
         log.info("In getFullBookingsList - {} booking(s) found", bookingList.size());
-        return bookingList.stream().map(bookingMapper::toDto).collect(Collectors.toList());
+        return bookingList.stream().map(BookingDto::createBookingDto)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -92,7 +94,7 @@ public class BookingServiceImpl implements BookingService {
             log.warn("In getBookingById booking with id: {} not found", id);
             throw new BookingException("Booking not found");
         }
-        return bookingMapper.toDto(booking);
+        return BookingDto.createBookingDto(booking);
     }
 
     @Override
@@ -100,7 +102,8 @@ public class BookingServiceImpl implements BookingService {
         UserDto user = userService.getUserById(id);
         List<Booking> bookingList = bookingRepository.findBookingByUserId(user.getId());
         log.info("In getBookingByUserId - {} booking(s) found", bookingList.size());
-        return bookingList.stream().map(bookingMapper::toDto).collect(Collectors.toList());
+        return bookingList.stream().map(BookingDto::createBookingDto)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -108,7 +111,8 @@ public class BookingServiceImpl implements BookingService {
         RoomDto room = roomService.getRoomById(id);
         List<Booking> bookingList = bookingRepository.findBookingByRoomId(room.getId());
         log.info("In getBookingByRoomId - {} booking(s) found", bookingList.size());
-        return bookingList.stream().map(bookingMapper::toDto).collect(Collectors.toList());
+        return bookingList.stream().map(BookingDto::createBookingDto)
+                .collect(Collectors.toList());
     }
 
     @Override

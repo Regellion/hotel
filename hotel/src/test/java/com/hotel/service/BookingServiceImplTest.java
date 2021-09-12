@@ -231,7 +231,7 @@ class BookingServiceImplTest {
 
     @Test
     void getBookingById() {
-        Booking booking = Booking.builder().id(1L).build();
+        Booking booking = Booking.builder().id(1L).room(new Room()).user(new User()).startDate(new Date()).endDate(new Date()).deleteTime(new Date()).build();
 
         when(bookingRepository.findById(1L)).thenReturn(Optional.of(booking));
         BookingDto bookingDto = bookingService.getBookingById(1L);
@@ -251,10 +251,9 @@ class BookingServiceImplTest {
         List<Booking> bookings = new ArrayList<>();
         User user = User.builder().id(1L).build();
         User user2 = User.builder().id(2L).build();
-
-        Booking booking = Booking.builder().id(1L).user(user).build();
-        Booking booking2 = Booking.builder().id(2L).user(user2).build();
-        Booking booking3 = Booking.builder().id(3L).user(user).build();
+        Booking booking = Booking.builder().id(1L).room(new Room()).user(user).startDate(new Date()).endDate(new Date()).deleteTime(new Date()).build();
+        Booking booking2 = Booking.builder().id(2L).room(new Room()).user(user2).startDate(new Date()).endDate(new Date()).deleteTime(new Date()).build();
+        Booking booking3 = Booking.builder().id(3L).room(new Room()).user(user).startDate(new Date()).endDate(new Date()).deleteTime(new Date()).build();
 
         bookings.add(booking);
         bookings.add(booking2);
@@ -280,9 +279,9 @@ class BookingServiceImplTest {
         List<Booking> bookings = new ArrayList<>();
         Room room = Room.builder().id(1L).build();
         Room room2 = Room.builder().id(2L).build();
-        Booking booking = Booking.builder().id(1L).room(room).build();
-        Booking booking2 = Booking.builder().id(2L).room(room2).build();
-        Booking booking3 = Booking.builder().id(3L).room(room).build();
+        Booking booking = Booking.builder().id(1L).room(room).user(new User()).startDate(new Date()).endDate(new Date()).deleteTime(new Date()).build();
+        Booking booking2 = Booking.builder().id(2L).room(room2).user(new User()).startDate(new Date()).endDate(new Date()).deleteTime(new Date()).build();
+        Booking booking3 = Booking.builder().id(3L).room(room).user(new User()).startDate(new Date()).endDate(new Date()).deleteTime(new Date()).build();
 
         bookings.add(booking);
         bookings.add(booking2);
