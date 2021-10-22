@@ -7,7 +7,7 @@ BEGIN
     declare end_date date;
 
     DECLARE cur1 CURSOR FOR SELECT b.start_date, b.end_date
-        FROM senla_traineeship.bookings b
+        FROM test.bookings b
         where b.room_id = room_id
             and b.delete_time IS NULL;
     DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = true;
