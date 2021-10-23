@@ -19,7 +19,6 @@ public class AuthenticationController {
 
     @PostMapping("/api/login")
     public ResponseEntity<Map<Object, Object>> login(@RequestBody UserDto userDto) {
-
         String token = loginService.login(userDto);
         Map<Object, Object> response = new HashMap<>();
         response.put("username", userDto.getLogin());
