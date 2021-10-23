@@ -2,6 +2,7 @@ package com.hotel.controller;
 
 import com.hotel.configuration.security.JwtTokenProvider;
 import com.hotel.dto.UserDto;
+import com.hotel.service.LoginService;
 import com.hotel.service.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -21,29 +22,17 @@ import java.util.Map;
 @AllArgsConstructor
 public class AuthenticationController {
 
-
-    private final AuthenticationManager authenticationManager;
-    private final JwtTokenProvider provider;
-    private final UserService userService;
+    private final LoginService loginService;
 
     @PostMapping("/api/login")
     public ResponseEntity<Map<Object, Object>> login(@RequestBody UserDto userDto) {
-        try {
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userDto.getLogin(), userDto.getPassword()));
-            UserDto user = userService.loadUserByLogin(userDto.getLogin());
-            if (user == null) {
-                throw new UsernameNotFoundException("User with username: " + userDto.getLogin() + " not found");
-            }
-            String token = provider.createToken(user.getLogin(), user.getRole());
+
+            String token = loginService.login(userDto);
             Map<Object, Object> response = new HashMap<>();
             response.put("username", userDto.getLogin());
             response.put("token", token);
-            response.put("role", user.getRole());
 
             return ResponseEntity.ok(response);
-        } catch (AuthenticationException e) {
-            throw new BadCredentialsException("Invalid username or password");
-        }
     }
 
 }
