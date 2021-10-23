@@ -1,16 +1,9 @@
 package com.hotel.controller;
 
-import com.hotel.configuration.security.JwtTokenProvider;
 import com.hotel.dto.UserDto;
 import com.hotel.service.LoginService;
-import com.hotel.service.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,13 +19,12 @@ public class AuthenticationController {
 
     @PostMapping("/api/login")
     public ResponseEntity<Map<Object, Object>> login(@RequestBody UserDto userDto) {
+        String token = loginService.login(userDto);
+        Map<Object, Object> response = new HashMap<>();
+        response.put("username", userDto.getLogin());
+        response.put("token", token);
 
-            String token = loginService.login(userDto);
-            Map<Object, Object> response = new HashMap<>();
-            response.put("username", userDto.getLogin());
-            response.put("token", token);
-
-            return ResponseEntity.ok(response);
+        return ResponseEntity.ok(response);
     }
 
 }

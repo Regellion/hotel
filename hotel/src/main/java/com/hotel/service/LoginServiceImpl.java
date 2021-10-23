@@ -2,13 +2,11 @@ package com.hotel.service;
 
 import com.hotel.configuration.security.JwtTokenProvider;
 import com.hotel.dto.UserDto;
-import com.hotel.exception.UserException;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -16,7 +14,6 @@ import org.springframework.stereotype.Service;
 public class LoginServiceImpl implements LoginService {
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider provider;
-    private final UserService userService;
 
     @Override
     public String login(UserDto userDto) {
